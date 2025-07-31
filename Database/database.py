@@ -4,4 +4,11 @@ from ..config import settings
 engine = create_engine(settings.PostgreSQL_DB_URL + settings.PostgreSQL_DB_NAME)
 
 def create_tables():
+    # Import All models here to Create Tables
+    from Models.delivery import Delivery
+    from Models.user import User
     SQLModel.metadata.create_all(engine)
+
+
+if __name__ == "__main__":
+    create_tables()
