@@ -3,6 +3,7 @@ import json
 import logging
 import asyncio
 from pathlib import Path
+from ..config import settings
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -11,7 +12,6 @@ from telegram.ext import (
     ConversationHandler,
     filters,
 )
-from authentication import botToken
 from commands import (
     start, help_command, support, COMMANDS as SLASH_COMMANDS
 )
@@ -69,7 +69,7 @@ async def _set_commands(app):
 def main():
     app = (
         ApplicationBuilder()
-        .token(botToken)
+        .token(settings.TELEGRAM_BOT_TOKEN)
         .post_init(_set_commands)
         .build()
     )

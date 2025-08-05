@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     # Database
     PostgreSQL_DB_URL: str
     PostgreSQL_DB_NAME: str
+    # TelegramBot
+    TELEGRAM_BOT_TOKEN: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -15,3 +15,4 @@ class User(SQLModel,table=True):
     user_type: UserType = Field(default=UserType.CUSTOMER)
     premium: bool = Field(default=False)
     premium_exp_time: datetime.date | None = Field(default=None)
+    n_delivery: int = Field(default=0) 
