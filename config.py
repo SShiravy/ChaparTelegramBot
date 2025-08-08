@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     PostgreSQL_DB_NAME: str
     # TelegramBot
     TELEGRAM_BOT_TOKEN: str
+    # UserBot
+    USER_BOT_STR_SESSION: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
