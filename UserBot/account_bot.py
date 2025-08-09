@@ -1,39 +1,40 @@
 from pyrogram.client import Client
 from ..Models.delivery import Delivery
-from sqlmodel import Session
-from ..Database.database import engine
+from custom_logger import logger
+
 
 class DeliveryBot:
     def __init__(self,name:str, session_str):
         self.bot = Client(name=name, in_memory=True,session_string=session_str)
     
-    async def join_chat(self):
-        # TODO: complete this
-        pass
+    async def join_chat(self,chat_id) -> bool:
+        """
+        chat_id can be:
+            - "@username"
+            - "https://t.me/joinchat/xxxx"
+            - "-1001234567890" (if bot session already recognized)
+        """
 
-    async def handle_forward(self,msg,delivery:Delivery):
-        await self.bot.forward_messages(
-            chat_id=delivery.destination_id,
-            from_chat_id=delivery.source_id,
-            message_ids=msg.id,
-        )
-        if msg.id > delivery.last_forwarded_msg_id:
-            delivery.last_forwarded_msg_id = msg.id
-            delivery.n_forwarded_msg += 1
-            add_delivery_to_db(delivery)
-        # TODO: add multiple forward support
-        # TODO: add error handling
+        try:
+            chat = await self.bot.join_chat(chat_id)
+            logger.info(f" account bot joined: {chat.title} ({chat.id})")
+            return True
+        except Exception as e:
+            logger.error(f" account bot Failed to join {chat_id}: {e}")
+            return False
 
+    async def get_last_msg_id(self,chat_id)->int|None:
+        try:
+            async for message in self.bot.get_chat_history(chat_identifier, limit=1): # type:ignore
+                logger.info(f"Last message ID in {chat_id}: {message.id}")
+                return message.id
+            logger.warning(f"No messages found in {chat_id}")
+            return None
+        except Exception as e:
+            logger.error(f"account bot Failed to get last message from {chat_id}: {e}")
+            return None
 
-async def set_last_msg_ids(self):
-    with self.bot:
-        for channel_id in source_channel_id:
-            async for msg in user_bot.get_chat_history(channel_id, limit=1): # type:ignore
-                all_channels_last_msg_id[channel_id] = msg.id
-    print(all_channels_last_msg_id)
+    async def run(self,coro):
+        self.bot.run(coro)
+  
     
-
-def add_delivery_to_db(delivery):
-    with Session(engine) as session:
-        session.add(delivery)
-        session.commit()

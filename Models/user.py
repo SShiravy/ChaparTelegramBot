@@ -10,8 +10,8 @@ class UserType(Enum):
 class User(SQLModel,table=True):
     __tablename__ = 'users' # type: ignore
     id: int | None = Field(default=None, primary_key=True)
-    account_id: str = Field(unique=True)
-    username: str|None = Field(default=None)
+    account_id: str = Field(unique=True,index=True)
+    username: str|None = Field(default=None,index=True)
     user_type: UserType = Field(default=UserType.CUSTOMER)
     premium: bool = Field(default=False)
     premium_exp_time: datetime.date | None = Field(default=None)
