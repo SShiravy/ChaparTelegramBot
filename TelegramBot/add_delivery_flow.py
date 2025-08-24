@@ -3,12 +3,14 @@ from enum import Enum
 from telegram import Update
 from telegram.error import BadRequest
 from Models.delivery import Delivery
+from Models.user import User, UserType
 from custom_logger import logger
 from Database import db_methods
 from telegram.ext import (
-    CallbackQueryHandler, CommandHandler, MessageHandler,
+    CommandHandler, MessageHandler,
     ConversationHandler, ContextTypes, filters
 )
+from TelegramBot.messages import CRASH_MSG
 
 class AddDeliveryStates(Enum):
     """
@@ -25,14 +27,19 @@ async def create_new_delivery(update: Update, context: ContextTypes.DEFAULT_TYPE
     Entry point for creating a delivery.
     Ensure the user exists in DB and hasn't exceeded quota.
     """
-    # NOTE: db_methods.fetch_user_by_id expects account_id (string) 
     user_account_id = str(update.effective_user.id)
     the_user = db_methods.fetch_user_by_id(user_account_id)
 
-    # VERY RARE CASE
     if the_user is None:
-        await update.message.reply_text("حساب کاربری شما در سیستم ثبت نشده است. لطفا ابتدا شروع کنید.")
-        return ConversationHandler.END
+        res = db_methods.add_new_user(User(account_id=str(update.effective_user.id), 
+                                username=update.effective_user.username,
+                                user_type=UserType.CUSTOMER))
+        if res is False:
+            await update.message.reply_text(
+            CRASH_MSG,
+            reply_markup=start_panel_keyboard()
+        )
+            return ConversationHandler.END
 
     if getattr(the_user, "n_delivery", 0) >= 5:
         await update.message.reply_text(
@@ -117,10 +124,9 @@ async def get_delivery_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_account_id = str(update.effective_user.id)  
     # Build a Delivery model instance
-    # If our User.model stores account_id separately, we may need to map account_id -> users.id first.
     new_delivery = Delivery(
         name=name,
-        user_id=update.effective_user.id,   # assumes DB user id is the telegram numeric id or use proper mapping
+        user_account_id= str(update.effective_user.id),  
         source_id=context.user_data[AddDeliveryStates.GET_SOURCE_ID.name], # this is source username actually
         destination_id=context.user_data[AddDeliveryStates.GET_DESTINATION_ID.name],
     )

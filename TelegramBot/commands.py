@@ -1,17 +1,23 @@
 from telegram import Update, BotCommand
 from telegram.ext import ContextTypes
-# try both import styles so module works whether run from project root or inside TelegramBot folder
-try:
-    from .keyboardes import start_panel_keyboard
-    from .messages import START_MSG, HELP_MSG, SUPPORT_MSG
-except Exception:
-    from keyboardes import start_panel_keyboard
-    from messages import START_MSG, HELP_MSG, SUPPORT_MSG
+from TelegramBot.keyboardes import start_panel_keyboard
+from TelegramBot.messages import START_MSG, HELP_MSG, SUPPORT_MSG, CRASH_MSG
+from Database.db_methods import add_new_user
+from Models.user import User,UserType
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handler for /start and for the persistent keyboard 'start' button.
     """
+
+    res = add_new_user(User(account_id=str(update.effective_user.id), 
+                             username=update.effective_user.username,
+                               user_type=UserType.CUSTOMER))
+    if res is False:
+        await update.message.reply_text(
+        CRASH_MSG,
+        reply_markup=start_panel_keyboard()
+    )
     await update.message.reply_text(
         START_MSG,
         reply_markup=start_panel_keyboard()

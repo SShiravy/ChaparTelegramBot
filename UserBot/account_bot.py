@@ -1,5 +1,4 @@
 from pyrogram.client import Client
-from ..Models.delivery import Delivery
 from custom_logger import logger
 
 

@@ -8,8 +8,7 @@ class Settings(BaseSettings):
         return cls.__instance__
 
     # Database
-    PostgreSQL_DB_URL: str
-    PostgreSQL_DB_NAME: str
+    DATABASE_NAME: str
     # TelegramBot
     TELEGRAM_BOT_TOKEN: str
     # UserBot

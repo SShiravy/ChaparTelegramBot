@@ -12,16 +12,14 @@ from telegram.ext import (
     filters,
 )
 
-from add_delivery_flow import add_delivery_handler
-from get_delivery_info_flow import get_delivery_conversation
-from keyboardes import start_panel_keyboard
-from commands import start, help_command, support, COMMANDS as SLASH_COMMANDS
+from TelegramBot.add_delivery_flow import add_delivery_handler
+from TelegramBot.get_delivery_info_flow import get_delivery_conversation
+from TelegramBot.messages import CRASH_MSG
+from TelegramBot.commands import start, help_command, support, COMMANDS as SLASH_COMMANDS
 
 from config import settings
-TOKEN = settings.TELEGRAM_BOT_TOKEN
 
 
-from Database import database as db_module
 
 
 
@@ -38,7 +36,7 @@ async def error_handler(update, context):
     # Optionally notify admin, or reply to user:
     try:
         if update and update.effective_message:
-            await update.effective_message.reply_text("خطا در پردازش درخواست شما. لطفا دوباره تلاش کنید.")
+            await update.effective_message.reply_text(CRASH_MSG)
     except Exception:
         # swallow to avoid recursive errors
         pass
@@ -54,11 +52,10 @@ async def _set_commands(app):
         logger.warning("Failed to set bot commands: %s", e)
 
 
-def main():
+def run_telegram_bot():
     app = (
         ApplicationBuilder()
-        .token(TOKEN)
-        .post_init(_set_commands)
+        .token(settings.TELEGRAM_BOT_TOKEN)
         .build()
     )
 
@@ -87,7 +84,4 @@ def main():
     app.add_error_handler(error_handler)
 
     logger.info("Bot starting polling...")
-    app.run_polling(drop_pending_updates=True, poll_interval=1.0)
-
-if __name__ == "__main__":
-    main()
+    app.run_polling(drop_pending_updates=True)

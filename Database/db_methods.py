@@ -1,7 +1,7 @@
 from Models.user import User
 from Models.delivery import Delivery
 from sqlmodel import Session, select
-from database import engine
+from Database.database import engine
 from custom_logger import logger
 
 
@@ -75,7 +75,7 @@ def update_delivery_in_db(delivery:Delivery) -> bool:
 def get_user_deliveries(user_id:str):
     try:
         with Session(engine) as db_session:
-            deliveries = db_session.exec(select(Delivery).where(Delivery.user_id == user_id)).all()
+            deliveries = db_session.exec(select(Delivery).where(Delivery.user_account_id == user_id)).all()
     except Exception as e:
         logger.error(f"error on getting user:{user_id} deliveries from database, error:{e}")
         return []
