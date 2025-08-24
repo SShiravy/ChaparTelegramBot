@@ -1,6 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from Database import db_methods
-from custom_logger import logger
+import logging
 
 def start_panel_keyboard():
     layout = [
@@ -37,7 +37,7 @@ def all_deliveries_panel(user_id: str) -> InlineKeyboardMarkup | None:
     try:
         deliveries = db_methods.get_user_deliveries(user_id)
     except Exception as e:
-        logger.error(f"Failed to fetch deliveries for {user_id}: {e}")
+        logging.error(f"Failed to fetch deliveries for {user_id}: {e}")
         deliveries = []
 
     if not deliveries:

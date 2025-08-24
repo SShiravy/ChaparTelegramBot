@@ -212,3 +212,8 @@ __marimo__/
 
 # Database
 *.db
+
+
+# Session Telegram
+*.session-journal
+*.session

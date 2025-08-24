@@ -21,7 +21,7 @@ class ConfigRootLogger:
     @classmethod
     def __consol_handler(cls,log_level):
         formatter = colorlog.ColoredFormatter(
-            '{log_color}#{asctime}#{filename}# --*{levelname}*->|[{message}]|',
+            '{log_color}#{name}-{asctime} {filename} # --*{levelname}*->|[{message}]|',
             style='{',
             datefmt='%H:%M:%S"',
             log_colors={
@@ -50,7 +50,19 @@ class ConfigRootLogger:
         file_handler.setLevel(log_level)
         return file_handler
 
-logger = ConfigRootLogger(consol_log_level=logging.WARNING,log_file=True, file_log_level=logging.INFO)
+# logger = ConfigRootLogger(consol_log_level=logging.WARNING,log_file=True, file_log_level=logging.INFO)
+
+logging.getLogger("telegram").setLevel(logging.WARNING)
+logging.getLogger("telegram.ext").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("asyncio").setLevel(logging.WARNING)
+logging.getLogger("aiohttp").setLevel(logging.WARNING)
+logging.getLogger("pyrogram").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+
 
 if __name__ == '__main__':
     ConfigRootLogger().debug('mio')

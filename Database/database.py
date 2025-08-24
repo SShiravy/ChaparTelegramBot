@@ -4,7 +4,7 @@ from config import settings
 # engine = create_engine(settings.PostgreSQL_DB_URL + settings.PostgreSQL_DB_NAME)
 
 sqlite_url = f"sqlite:///{settings.DATABASE_NAME}"
-engine = create_engine(sqlite_url, echo=True)
+engine = create_engine(sqlite_url, echo=False)
 
 def create_tables():
     # Import All models here to Create Tables

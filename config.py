@@ -12,7 +12,12 @@ class Settings(BaseSettings):
     # TelegramBot
     TELEGRAM_BOT_TOKEN: str
     # UserBot
+    USER_BOT_API_ID: int
+    USER_BOT_API_HASH: str
     USER_BOT_STR_SESSION: str
+    USER_BOT_USE_PROXY: bool
+    USER_BOT_SLEEP_TIME: int
+
 
     model_config = SettingsConfigDict(env_file=".env")
 

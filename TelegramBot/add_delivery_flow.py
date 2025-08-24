@@ -4,13 +4,14 @@ from telegram import Update
 from telegram.error import BadRequest
 from Models.delivery import Delivery
 from Models.user import User, UserType
-from custom_logger import logger
 from Database import db_methods
 from telegram.ext import (
     CommandHandler, MessageHandler,
     ConversationHandler, ContextTypes, filters
 )
 from TelegramBot.messages import CRASH_MSG
+import logging
+
 
 class AddDeliveryStates(Enum):
     """
@@ -64,7 +65,7 @@ async def get_source_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("در حال بررسی کانال مبدا...")
         chat = await context.bot.get_chat(user_input)
     except BadRequest as e:
-        logger.info(f"Invalid source chat provided by {update.effective_user.id}: {user_input} - {e}")
+        logging.info(f"Invalid source chat provided by {update.effective_user.id}: {user_input} - {e}")
         await update.message.reply_text("آیدی کانال مبدا معتبر نیست. لطفا دوباره تلاش کنید.")
         return ConversationHandler.END
 
@@ -86,7 +87,7 @@ async def get_destination_chat(update: Update, context: ContextTypes.DEFAULT_TYP
     try:
         chat = await context.bot.get_chat(user_input)
     except BadRequest as e:
-        logger.info(f"Invalid destination chat provided by {update.effective_user.id}: {user_input} - {e}")
+        logging.info(f"Invalid destination chat provided by {update.effective_user.id}: {user_input} - {e}")
         await update.message.reply_text("آیدی کانال مقصد معتبر نیست. لطفا دوباره تلاش کنید.")
         return ConversationHandler.END
 
@@ -98,10 +99,10 @@ async def get_destination_chat(update: Update, context: ContextTypes.DEFAULT_TYP
             is_admin = True
     except BadRequest as e:
         # When the member list is inaccessible or bot is not present, get_chat_member may raise BadRequest
-        logger.info(f"Could not get bot membership for chat {chat.id}: {e}")
+        logging.info(f"Could not get bot membership for chat {chat.id}: {e}")
         is_admin = False
     except Exception as e:
-        logger.error(f"Unexpected error while checking membership for chat {chat.id}: {e}")
+        logging.error(f"Unexpected error while checking membership for chat {chat.id}: {e}")
         is_admin = False
 
     if not is_admin:
@@ -141,14 +142,14 @@ async def get_delivery_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         selected_user.n_delivery = getattr(selected_user, "n_delivery", 0) + 1
         db_methods.update_user_in_db(selected_user)
 
-    logger.info(f"New delivery created; user={user_account_id}, delivery={new_delivery}")
+    logging.info(f"New delivery created; user={user_account_id}, delivery={new_delivery}")
     await update.message.reply_text("چاپار شما با موفقیت فعال شد")
     return ConversationHandler.END
 
 
 async def cancel_add_delivery(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("ساخت چاپار لغو شد!")
-    logger.info(f"User {update.effective_user.id} canceled add delivery")
+    logging.info(f"User {update.effective_user.id} canceled add delivery")
     return ConversationHandler.END
 
 

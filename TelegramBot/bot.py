@@ -18,21 +18,12 @@ from TelegramBot.messages import CRASH_MSG
 from TelegramBot.commands import start, help_command, support, COMMANDS as SLASH_COMMANDS
 
 from config import settings
+import logging
 
-
-
-
-
-# Set up logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
-logger = logging.getLogger(__name__)
 
 # Simple error handler
 async def error_handler(update, context):
-    logger.exception("Uncaught error while processing an update", exc_info=context.error)
+    logging.exception("Uncaught error while processing an update", exc_info=context.error)
     # Optionally notify admin, or reply to user:
     try:
         if update and update.effective_message:
@@ -49,10 +40,10 @@ async def _set_commands(app):
     try:
         await app.bot.set_my_commands(SLASH_COMMANDS)
     except Exception as e:
-        logger.warning("Failed to set bot commands: %s", e)
+        logging.warning("Failed to set bot commands: %s", e)
 
 
-def run_telegram_bot():
+def start_telegram_bot():
     app = (
         ApplicationBuilder()
         .token(settings.TELEGRAM_BOT_TOKEN)
@@ -83,5 +74,5 @@ def run_telegram_bot():
     # Add application-level error handler
     app.add_error_handler(error_handler)
 
-    logger.info("Bot starting polling...")
+    logging.info("Bot starting polling...")
     app.run_polling(drop_pending_updates=True)
