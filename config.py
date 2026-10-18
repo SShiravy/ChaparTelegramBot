@@ -18,7 +18,6 @@ class Settings(BaseSettings):
     USER_BOT_USE_PROXY: bool
     USER_BOT_SLEEP_TIME: int
 
-
     model_config = SettingsConfigDict(env_file=".env")
 
 

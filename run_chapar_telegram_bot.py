@@ -4,12 +4,15 @@ from custom_logger import ConfigRootLogger
 import logging
 
 
-ConfigRootLogger(consol_log_level=logging.DEBUG,log_file=True,
-                 file_log_level=logging.DEBUG, file_log_name='TelegramBot')
+ConfigRootLogger(
+    consol_log_level=logging.DEBUG,
+    log_file=True,
+    file_log_level=logging.DEBUG,
+    file_log_name="TelegramBot",
+)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_tables()
     while True:
         try:

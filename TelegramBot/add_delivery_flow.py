@@ -1,4 +1,3 @@
-
 from enum import Enum
 from telegram import Update
 from telegram.error import BadRequest
@@ -6,8 +5,11 @@ from Models.delivery import Delivery
 from Models.user import User, UserType
 from Database import db_methods
 from telegram.ext import (
-    CommandHandler, MessageHandler,
-    ConversationHandler, ContextTypes, filters
+    CommandHandler,
+    MessageHandler,
+    ConversationHandler,
+    ContextTypes,
+    filters,
 )
 from TelegramBot.messages import CRASH_MSG
 import logging
@@ -15,14 +17,19 @@ import logging
 
 class AddDeliveryStates(Enum):
     """
-    we will return these states in handlers 
+    we will return these states in handlers
     and use .name parameter as a key for context.user_data
     and .value param for msgs
     """
+
     GET_SOURCE_ID = "لطفا آیدی کانال مبدا را ارسال کنید"
-    GET_DESTINATION_ID = ("لطفا آیدی کانال مقصد را وارد کنید.\n""توجه کنید که اول باید ربات در این کانال ادمین باشد.")
+    GET_DESTINATION_ID = (
+        "لطفا آیدی کانال مقصد را وارد کنید.\n"
+        "توجه کنید که اول باید ربات در این کانال ادمین باشد."
+    )
     GET_DELIVARY_NAME = "یک نام دلخواه برای چاپار خود انتخاب کنید"
-    
+
+
 async def create_new_delivery(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Entry point for creating a delivery.
@@ -32,14 +39,17 @@ async def create_new_delivery(update: Update, context: ContextTypes.DEFAULT_TYPE
     the_user = db_methods.fetch_user_by_id(user_account_id)
 
     if the_user is None:
-        res = db_methods.add_new_user(User(account_id=str(update.effective_user.id), 
-                                username=update.effective_user.username,
-                                user_type=UserType.CUSTOMER))
+        res = db_methods.add_new_user(
+            User(
+                account_id=str(update.effective_user.id),
+                username=update.effective_user.username,
+                user_type=UserType.CUSTOMER,
+            )
+        )
         if res is False:
             await update.message.reply_text(
-            CRASH_MSG,
-            reply_markup=start_panel_keyboard()
-        )
+                CRASH_MSG, reply_markup=start_panel_keyboard()
+            )
             return ConversationHandler.END
 
     if getattr(the_user, "n_delivery", 0) >= 5:
@@ -65,8 +75,12 @@ async def get_source_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("در حال بررسی کانال مبدا...")
         chat = await context.bot.get_chat(user_input)
     except BadRequest as e:
-        logging.info(f"Invalid source chat provided by {update.effective_user.id}: {user_input} - {e}")
-        await update.message.reply_text("آیدی کانال مبدا معتبر نیست. لطفا دوباره تلاش کنید.")
+        logging.info(
+            f"Invalid source chat provided by {update.effective_user.id}: {user_input} - {e}"
+        )
+        await update.message.reply_text(
+            "آیدی کانال مبدا معتبر نیست. لطفا دوباره تلاش کنید."
+        )
         return ConversationHandler.END
 
     await update.message.reply_text(AddDeliveryStates.GET_DESTINATION_ID.value)
@@ -87,8 +101,12 @@ async def get_destination_chat(update: Update, context: ContextTypes.DEFAULT_TYP
     try:
         chat = await context.bot.get_chat(user_input)
     except BadRequest as e:
-        logging.info(f"Invalid destination chat provided by {update.effective_user.id}: {user_input} - {e}")
-        await update.message.reply_text("آیدی کانال مقصد معتبر نیست. لطفا دوباره تلاش کنید.")
+        logging.info(
+            f"Invalid destination chat provided by {update.effective_user.id}: {user_input} - {e}"
+        )
+        await update.message.reply_text(
+            "آیدی کانال مقصد معتبر نیست. لطفا دوباره تلاش کنید."
+        )
         return ConversationHandler.END
 
     # 2) check bot membership/admin in the destination channel
@@ -102,7 +120,9 @@ async def get_destination_chat(update: Update, context: ContextTypes.DEFAULT_TYP
         logging.info(f"Could not get bot membership for chat {chat.id}: {e}")
         is_admin = False
     except Exception as e:
-        logging.error(f"Unexpected error while checking membership for chat {chat.id}: {e}")
+        logging.error(
+            f"Unexpected error while checking membership for chat {chat.id}: {e}"
+        )
         is_admin = False
 
     if not is_admin:
@@ -123,12 +143,14 @@ async def get_delivery_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     context.user_data[AddDeliveryStates.GET_DELIVARY_NAME.name] = name
 
-    user_account_id = str(update.effective_user.id)  
+    user_account_id = str(update.effective_user.id)
     # Build a Delivery model instance
     new_delivery = Delivery(
         name=name,
-        user_account_id= str(update.effective_user.id),  
-        source_id=context.user_data[AddDeliveryStates.GET_SOURCE_ID.name], # this is source username actually
+        user_account_id=str(update.effective_user.id),
+        source_id=context.user_data[
+            AddDeliveryStates.GET_SOURCE_ID.name
+        ],  # this is source username actually
         destination_id=context.user_data[AddDeliveryStates.GET_DESTINATION_ID.name],
     )
 
@@ -136,13 +158,15 @@ async def get_delivery_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("ساخت چاپار شما با شکست مواجه شد!")
         return ConversationHandler.END
 
-    # update user's delivery count 
+    # update user's delivery count
     selected_user = db_methods.fetch_user_by_id(user_account_id)
     if selected_user is not None:
         selected_user.n_delivery = getattr(selected_user, "n_delivery", 0) + 1
         db_methods.update_user_in_db(selected_user)
 
-    logging.info(f"New delivery created; user={user_account_id}, delivery={new_delivery}")
+    logging.info(
+        f"New delivery created; user={user_account_id}, delivery={new_delivery}"
+    )
     await update.message.reply_text("چاپار شما با موفقیت فعال شد")
     return ConversationHandler.END
 
@@ -156,10 +180,15 @@ async def cancel_add_delivery(update: Update, context: ContextTypes.DEFAULT_TYPE
 add_delivery_handler = ConversationHandler(
     entry_points=[MessageHandler(filters.Regex("^ساخت چاپار$"), create_new_delivery)],
     states={
-        AddDeliveryStates.GET_SOURCE_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_source_chat)],
-        AddDeliveryStates.GET_DESTINATION_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_destination_chat)],
-        AddDeliveryStates.GET_DELIVARY_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_delivery_name)]
+        AddDeliveryStates.GET_SOURCE_ID: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, get_source_chat)
+        ],
+        AddDeliveryStates.GET_DESTINATION_ID: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, get_destination_chat)
+        ],
+        AddDeliveryStates.GET_DELIVARY_NAME: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, get_delivery_name)
+        ],
     },
-    fallbacks=[CommandHandler('cancel', cancel_add_delivery)]
+    fallbacks=[CommandHandler("cancel", cancel_add_delivery)],
 )
-

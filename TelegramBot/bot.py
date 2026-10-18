@@ -15,7 +15,12 @@ from telegram.ext import (
 from TelegramBot.add_delivery_flow import add_delivery_handler
 from TelegramBot.get_delivery_info_flow import get_delivery_conversation
 from TelegramBot.messages import CRASH_MSG
-from TelegramBot.commands import start, help_command, support, COMMANDS as SLASH_COMMANDS
+from TelegramBot.commands import (
+    start,
+    help_command,
+    support,
+    COMMANDS as SLASH_COMMANDS,
+)
 
 from config import settings
 import logging
@@ -23,7 +28,9 @@ import logging
 
 # Simple error handler
 async def error_handler(update, context):
-    logging.exception("Uncaught error while processing an update", exc_info=context.error)
+    logging.exception(
+        "Uncaught error while processing an update", exc_info=context.error
+    )
     # Optionally notify admin, or reply to user:
     try:
         if update and update.effective_message:
@@ -31,6 +38,7 @@ async def error_handler(update, context):
     except Exception:
         # swallow to avoid recursive errors
         pass
+
 
 async def _set_commands(app):
     """
@@ -44,11 +52,7 @@ async def _set_commands(app):
 
 
 def start_telegram_bot():
-    app = (
-        ApplicationBuilder()
-        .token(settings.TELEGRAM_BOT_TOKEN)
-        .build()
-    )
+    app = ApplicationBuilder().token(settings.TELEGRAM_BOT_TOKEN).build()
 
     # Register command handlers
     app.add_handler(CommandHandler("start", start))
@@ -69,7 +73,12 @@ def start_telegram_bot():
     app.add_handler(MessageHandler(filters.Regex(r"^🆘 پشتیبانی$"), support))
 
     # Optionally expose a handler for "ساخت چاپار" in case user presses the reply key
-    app.add_handler(MessageHandler(filters.Regex(r"^ساخت چاپار$"), add_delivery_handler.entry_points[0].callback))
+    app.add_handler(
+        MessageHandler(
+            filters.Regex(r"^ساخت چاپار$"),
+            add_delivery_handler.entry_points[0].callback,
+        )
+    )
 
     # Add application-level error handler
     app.add_error_handler(error_handler)

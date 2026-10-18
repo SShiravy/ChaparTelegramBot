@@ -12,10 +12,12 @@ from Database import db_methods
 from .keyboardes import all_deliveries_panel, delivery_control_pannel
 from typing import Optional
 
+
 class DeliveryInfoStates(Enum):
     """
     Conversation states for listing/selecting deliveries and taking actions.
     """
+
     SELECT_DELIVERY = 1
     ACTION_CHOICE = 2
 
@@ -45,7 +47,7 @@ async def select_delivery(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     data = query.data  # like "delivery:42"
-    # 
+    #
     if not data or not data.startswith("delivery:"):
         await query.message.reply_text("خطا: شناسه چاپار نامعتبر است.")
         return ConversationHandler.END
@@ -62,7 +64,7 @@ async def select_delivery(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     # store selected delivery id for next actions
-    context.user_data['selected_delivery_id'] = delivery_id
+    context.user_data["selected_delivery_id"] = delivery_id
 
     # show control panel
     text = f"شما چاپار «{delivery.name}» را انتخاب کردید."
@@ -83,7 +85,7 @@ async def handle_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("بازگشت به منوی اصلی.")
         return ConversationHandler.END
 
-    delivery_id = context.user_data.get('selected_delivery_id')
+    delivery_id = context.user_data.get("selected_delivery_id")
     if delivery_id is None:
         await query.edit_message_text("خطا: هیچ چاپاری انتخاب نشده است.")
         return ConversationHandler.END
@@ -121,9 +123,11 @@ async def handle_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"• منبع (source): {delivery.source_id}",
             f"• مقصد (destination): {delivery.destination_id}",
             f"• تعداد پیام‌های فوروارد شده: {getattr(delivery, 'n_forwarded_msg', 0)}",
-            f"• وضعیت: {'فعال' if delivery.active else 'غیرفعال'}"
+            f"• وضعیت: {'فعال' if delivery.active else 'غیرفعال'}",
         ]
-        await query.edit_message_text("\n".join(text_lines), reply_markup=delivery_control_pannel())
+        await query.edit_message_text(
+            "\n".join(text_lines), reply_markup=delivery_control_pannel()
+        )
         return DeliveryInfoStates.ACTION_CHOICE
 
     # Unknown action
@@ -135,8 +139,14 @@ async def handle_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
 get_delivery_conversation = ConversationHandler(
     entry_points=[MessageHandler(filters.Regex("^📋 چاپار شما$"), list_deliveries)],
     states={
-        DeliveryInfoStates.SELECT_DELIVERY: [CallbackQueryHandler(select_delivery, pattern=r"^delivery:\d+$")],
-        DeliveryInfoStates.ACTION_CHOICE:   [CallbackQueryHandler(handle_action, pattern=r"^(enable|disable|summary|back_to_menu)$")],
+        DeliveryInfoStates.SELECT_DELIVERY: [
+            CallbackQueryHandler(select_delivery, pattern=r"^delivery:\d+$")
+        ],
+        DeliveryInfoStates.ACTION_CHOICE: [
+            CallbackQueryHandler(
+                handle_action, pattern=r"^(enable|disable|summary|back_to_menu)$"
+            )
+        ],
     },
     fallbacks=[],
     allow_reentry=True,

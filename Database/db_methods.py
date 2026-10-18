@@ -5,7 +5,7 @@ from Database.database import engine
 import logging
 
 
-def add_new_user(user:User) -> bool:
+def add_new_user(user: User) -> bool:
     try:
         with Session(engine) as db_session:
             db_session.add(user)
@@ -17,7 +17,8 @@ def add_new_user(user:User) -> bool:
         return False
     return True
 
-def add_new_delivery(delivery:Delivery) -> bool:
+
+def add_new_delivery(delivery: Delivery) -> bool:
     try:
         with Session(engine) as db_session:
             db_session.add(delivery)
@@ -29,7 +30,8 @@ def add_new_delivery(delivery:Delivery) -> bool:
         return False
     return True
 
-def fetch_user_by_id(user_id:str)->User|None:
+
+def fetch_user_by_id(user_id: str) -> User | None:
     try:
         with Session(engine) as db_session:
             user = db_session.exec(select(User).where(User.account_id == user_id)).one()
@@ -39,18 +41,23 @@ def fetch_user_by_id(user_id:str)->User|None:
         return None
     return user
 
-def fetch_delivery_by_id(delivery_id:int)->Delivery|None:
+
+def fetch_delivery_by_id(delivery_id: int) -> Delivery | None:
     try:
         with Session(engine) as db_session:
-            delivery = db_session.exec(select(Delivery).where(Delivery.id == delivery_id)).one()
+            delivery = db_session.exec(
+                select(Delivery).where(Delivery.id == delivery_id)
+            ).one()
             logging.debug(f"delivery fetched by id: {delivery_id}")
     except Exception as e:
-        logging.error(f"error on fetching delivery:{delivery_id} from database, error:{e}")
+        logging.error(
+            f"error on fetching delivery:{delivery_id} from database, error:{e}"
+        )
         return None
     return delivery
 
 
-def update_user_in_db(user:User) -> bool:
+def update_user_in_db(user: User) -> bool:
     try:
         with Session(engine) as db_session:
             db_session.add(user)
@@ -62,7 +69,8 @@ def update_user_in_db(user:User) -> bool:
         return False
     return True
 
-def update_delivery_in_db(delivery:Delivery) -> bool:
+
+def update_delivery_in_db(delivery: Delivery) -> bool:
     try:
         with Session(engine) as db_session:
             db_session.add(delivery)
@@ -74,15 +82,21 @@ def update_delivery_in_db(delivery:Delivery) -> bool:
         raise LookupError("Error while updating delivery in db")
     return True
 
-def get_user_deliveries(user_id:str):
+
+def get_user_deliveries(user_id: str):
     try:
         with Session(engine) as db_session:
-            deliveries = db_session.exec(select(Delivery).where(Delivery.user_account_id == user_id)).all()
+            deliveries = db_session.exec(
+                select(Delivery).where(Delivery.user_account_id == user_id)
+            ).all()
             logging.debug(f"{len(deliveries)} deliveries of {user_id} fetched")
     except Exception as e:
-        logging.error(f"error on getting user:{user_id} deliveries from database, error:{e}")
+        logging.error(
+            f"error on getting user:{user_id} deliveries from database, error:{e}"
+        )
         return []
     return deliveries
+
 
 def get_all_deliveries():
     try:
